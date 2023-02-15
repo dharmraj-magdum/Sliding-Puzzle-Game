@@ -7,16 +7,33 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- // -->
     <link rel="stylesheet" href="SlidingPuzzle.css">
-    <script src="https://kit.fontawesome.com/1826d4486b.js" crossorigin="anonymous"></script>
     <!-- // -->
     <script src="SlidingPuzzle.js" defer></script>
     <!-- // -->
-    <title>Sliding puzzle Game</title>
+    <title>SLIDING BLOCKS PUZZLE</title>
 </head>
 
 <body>
-    <div id="puzzle_container">
-        <!-- <div class="puzzle_block">1</div>
+    <section id="wrapper">
+        <div id="menu_container" class="show">
+            <div id="levels">
+                <p>Select Level</p>
+                <div class="sm-btn">3 X 3</div>
+                <div class="sm-btn active">4 X 4</div>
+                <div class="sm-btn">5 X 5</div>
+                <div class="sm-btn">6 X 6</div>
+                <div class="sm-btn">7 X 7</div>
+            </div>
+            <button class="btn" onclick="startGame()">Start</button>
+        </div>
+        <div id="action_container" class="">
+            <p id="win_message" class="">You Solved the Puzzle! <br> <small>Replay or start New level from Menu</small>
+            </p>
+            <button id="restart" class="btn" onclick="reStart()">Restart</button>
+            <button id="menu" class="btn" onclick="openMenu()">Go to Menu</button>
+        </div>
+        <div id="puzzle_container" class="blur">
+            <!-- <div class="puzzle_block">1</div>
         <div class="puzzle_block">2</div>
         <div class="puzzle_block">3</div>
         <div class="puzzle_block">4</div>
@@ -24,12 +41,8 @@
         <div class="puzzle_block">6</div>
         <div class="puzzle_block">7</div>
         <div class="puzzle_block">8</div> -->
-    </div>
-    <div id="difficulty_container">
-        <div class="difficulty_button active">EASY</div>
-        <div class="difficulty_button">MEDIUM</div>
-        <div class="difficulty_button">HARD</div>
-    </div>
+        </div>
+    </section>
 </body>
 
 </html>

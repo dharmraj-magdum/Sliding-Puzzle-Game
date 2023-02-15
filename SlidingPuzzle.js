@@ -1,36 +1,100 @@
+const menu_container = document.getElementById("menu_container");
+const action_container = document.getElementById("action_container");
 const puzzle_container = document.getElementById("puzzle_container");
-var difficulty = 1; //difficulty based on GameDifficulty array
-const ROW = 4; //how many rows
-const COLM = 4; //how many colomns
+const levels = document.querySelectorAll("#levels div");
+const win_message = document.getElementById("win_message");
+
+//////////////////////////////////
+var ROW = 4; //how many rows
+var COLM = 4; //how many colomns
 var COUNT; //cols*rows
 var all_blocks; //the html elements with className="puzzle_block"
-var CLIENT_WIDTH;
+let BLOCK_WIDTH;
 var emptyBlockCoords = [ROW - 1, ROW - 1]; //the coordinates of the empty block
 var indexes = []; //keeps track of the order of the blocks
 
-function initializeGame() {
+//////////////////////////////////
+//add listener to all level options
+levels.forEach((div) => {
+	div.addEventListener("click", selectLevel);
+});
+function selectLevel() {
+	//remove active on all other options
+	levels.forEach((div) => {
+		div.classList.remove("active");
+	});
+	this.classList.add("active");
+	let amount = this.innerText.charAt(0);
+	// console.log(amount);
+	ROW = COLM = amount;
+}
+
+/////
+function startGame() {
+	resetAll();
+	//now display board and secondary menu ,remove level menu
+	menu_container.classList.remove("show");
+	action_container.classList.add("show");
+	setTimeout(() => {
+		puzzle_container.classList.remove("blur");
+	}, 600);
+	initializeGame();
+}
+
+function resetAll() {
+	//show menu
+	menu_container.classList.add("show");
+	///remove show if have by secondary actions
+	action_container.classList.remove("show");
+	//make blur on board as game does not started
+	puzzle_container.classList.add("blur");
+	//remove prev win message
+	win_message.classList.remove("show");
+	///////
 	COUNT = ROW * COLM;
 	puzzle_container.innerHTML = "";
-	let blockWidth = Math.floor(puzzle_container.clientWidth / COLM);
-	puzzle_container.style.width = blockWidth * COLM + "px";
-	puzzle_container.style.height = blockWidth * COLM + "px";
+	indexes = [];
+	emptyBlockCoords = [ROW - 1, ROW - 1];
+	BLOCK_WIDTH = Math.floor(puzzle_container.clientHeight / COLM);
+	puzzle_container.style.width = BLOCK_WIDTH * COLM + "px";
+	puzzle_container.style.height = BLOCK_WIDTH * COLM + "px";
+}
+function reStart() {
+	resetAll();
+	menu_container.classList.remove("show");
+	action_container.classList.add("show");
+	puzzle_container.classList.add("blur");
+	initializeGame();
+	setTimeout(() => {
+		puzzle_container.classList.remove("blur");
+	}, 600);
+}
+function openMenu() {
+	resetAll();
+}
+
+function initializeGame() {
 	// console.log(blockWidth);
 	///create required blocks on board
 	for (let y = 0; y < ROW; y++) {
 		for (let x = 0; x < COLM; x++) {
+			let blockIdx = x + y * COLM;
+			// console.log(blockIdx);
+			indexes.push(blockIdx);
+			//put till second-last block if its last break to make empty
+			if (blockIdx > COUNT - 2) {
+				// console.log(x, y, blockIdx);
+				// console.log(blockIdx);
+				break;
+			}
+
 			let newBlock = document.createElement("div");
 			newBlock.classList.add("puzzle_block");
-			let blockIdx = x + y * COLM;
 			newBlock.innerText = blockIdx + 1;
-			newBlock.style.width = blockWidth + "px";
-			newBlock.style.height = blockWidth + "px";
-			newBlock.style.lineHeight = blockWidth + "px";
-			newBlock.style.fontSize = (blockWidth * 55) / 100 + "px";
-
-			indexes.push(blockIdx);
-			// console.log(blockIdx);
-			//put till second-last block if its last break to make empty
-			if (blockIdx >= COUNT - 1) break;
+			newBlock.style.width = BLOCK_WIDTH + "px";
+			newBlock.style.height = BLOCK_WIDTH + "px";
+			newBlock.style.lineHeight = BLOCK_WIDTH + "px";
+			newBlock.style.fontSize = (BLOCK_WIDTH * 55) / 100 + "px";
 
 			puzzle_container.appendChild(newBlock);
 
@@ -40,8 +104,9 @@ function initializeGame() {
 	//grab the all blocks in board
 	all_blocks = document.getElementsByClassName("puzzle_block");
 	//get width of block to do calc
-	CLIENT_WIDTH = all_blocks[0].clientWidth;
-
+	// BLOCK_WIDTH  = all_blocks[0].clientWidth;
+	// thire is 1 or 2px diff in width and clent width
+	// console.log(BLOCK_WIDTH, CLIENT_WIDTH);
 	// console.log(indexes);
 	//position each block in its proper position(first in correct order)
 	//beacuse for shuffling they have to at valid places
@@ -49,7 +114,9 @@ function initializeGame() {
 		for (let x = 0; x < COLM; x++) {
 			let blockIdx = x + y * COLM;
 
-			if (blockIdx >= COUNT - 1) break;
+			if (blockIdx > COUNT - 2) {
+				break;
+			}
 
 			//now position that block to its positin on plane/board
 			positionBlockAtCoord(blockIdx, x, y);
@@ -63,9 +130,8 @@ function initializeGame() {
 
 	//suffle board
 	randomize();
+	// console.log(indexes);
 }
-
-initializeGame();
 
 function positionBlockAtCoord(blockIdx, x, y) {
 	//get block from list by its index
@@ -73,8 +139,9 @@ function positionBlockAtCoord(blockIdx, x, y) {
 	// console.log(block);
 	//position the block at a certain coordinates
 	//set its left and top in position absolute co-ords
-	block.style.left = x * CLIENT_WIDTH + "px";
-	block.style.top = y * CLIENT_WIDTH + "px";
+	// console.log(x * CLIENT_WIDTH + "px", y * CLIENT_WIDTH + "px");
+	block.style.left = x * BLOCK_WIDTH + "px";
+	block.style.top = y * BLOCK_WIDTH + "px";
 }
 
 function randomize() {
@@ -106,6 +173,7 @@ function moveBlock(blockIdx) {
 		// (they not used in dom, they are just to check position)
 		emptyBlockCoords[0] = blockCoords[0];
 		emptyBlockCoords[1] = blockCoords[1];
+		//return true as say block is moved succesfully now check is it solved
 		return true;
 	}
 	return false;
@@ -116,7 +184,10 @@ function isMovable(block) {
 	//get row and colm by its actual position in DOM
 	///we can use Attribute on blocks to store its x and y but we use this
 	let blockPos = [parseInt(block.style.left), parseInt(block.style.top)];
-	let blockCoords = [blockPos[0] / CLIENT_WIDTH, blockPos[1] / CLIENT_WIDTH];
+	let blockCoords = [
+		Math.floor(blockPos[0] / BLOCK_WIDTH),
+		Math.floor(blockPos[1] / BLOCK_WIDTH),
+	];
 	// dif=[Xdiff,Ydiff]=[x1-x2,y1-y1]
 	let diff = [
 		Math.abs(blockCoords[0] - emptyBlockCoords[0]),
@@ -131,9 +202,11 @@ function isMovable(block) {
 
 function onClickOnBlock(blockIdx) {
 	if (moveBlock(blockIdx)) {
-		//the block is moved alwasys check is it solved now or not
+		//the blx 56yjock is moved alwasys check is it solved now or not
 		if (checkPuzzleSolved()) {
-			setTimeout(() => alert("Puzzle Solved!!"), 600);
+			setTimeout(() => {
+				win_message.classList.remove("show");
+			}, 700);
 		}
 	}
 }

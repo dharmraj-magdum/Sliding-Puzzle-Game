@@ -12,32 +12,130 @@
 	--mcol2: #1976d2;
 	--txtcol0: #90a4ae;
 	--txtcol1: #607d8b;
+	--txtcol2: #aeb7bc;
 	--whitecol: #eceff1;
 	--darkcol: #263238;
 }
 
 body {
-	/* width: vh;
-	height: 50vh; */
+	width: 100%;
+	height: 97vh;
 	display: flex;
 	flex-direction: column;
 	align-items: center;
-	padding-top: 6vh;
+	justify-content: center;
 	background-color: var(--bgcol);
 }
+#wrapper {
+	width: 70%;
+	height: 90%;
+	display: flex;
+	justify-content: center;
+	gap: 3rem;
+	/* border: 1px solid #fff; */
+}
+/* menu related// */
+/*difficulty container*/
+#menu_container,
+#action_container {
+	display: none;
+	width: 30%;
+	height: 100%;
+	align-items: center;
+	/* background-color: var(--darkcol); */
+	/* border-radius: 8px; */
+	margin-top: 2rem;
+	/* border: 1px solid #fff; */
+}
+/* ------ */
+#menu_container.show {
+	display: flex;
+	flex-direction: column;
+}
+#action_container.show {
+	display: flex;
+	flex-direction: column;
+}
+#menu_container p,
+#action_container p {
+	width: 100%;
+	height: 3rem;
+	font-size: 1.8rem;
+	font-weight: bold;
+	text-align: center;
+	margin: 0.5rem auto 1rem auto;
+	color: var(--mcol0);
+	/* border: 1px solid #fff; */
+	/* border-radius: 8px; */
+}
+#win_message {
+	display: none;
+	min-height: 3.8rem;
+	height: 30%;
+	color: var(--whitecol);
+}
+#win_message.show {
+	display: block;
+}
+p small {
+	width: 100%;
+	font-size: 1.1rem;
+	text-align: center;
+	margin-top: 0.2rem;
+	color: var(--txtcol0);
+}
+.btn,
+.sm-btn {
+	background-color: inherit;
+	width: 80%;
+	height: 4.5rem;
+	color: var(--mcol2);
+	text-align: center;
+	font-size: 2rem;
+	font-weight: bold;
+	padding: 1rem;
+	margin: 2rem auto 0 auto;
+	cursor: pointer;
+	border: none;
+	outline: none;
+	box-shadow: 0px 2px 3px 3px var(--txtcol1);
 
+	border-radius: 8px;
+	transition: font-size 0.3s;
+}
+.sm-btn {
+	height: 3.5rem;
+	font-size: 1.3rem;
+	padding: 0.8rem;
+	margin: 0.7rem auto 0 auto;
+}
+.btn:hover {
+	font-size: 2.2rem;
+	color: var(--mcol0);
+}
+.sm-btn:hover {
+	font-size: 1.5rem;
+	color: var(--mcol0);
+}
+.sm-btn.active {
+	pointer-events: none;
+	/* user-select: none; */
+	font-size: 1.5rem;
+	box-shadow: 0px 2px 3px 3px var(--mcol0);
+	color: var(--whitecol);
+}
+
+/* ///  board related //////////// */
 #puzzle_container {
 	position: relative;
 	/* this diamentions are temp real are set in js */
-	width: 80vh;
-	height: 80vh;
+	width: 56%;
+	height: 100%;
 	background-color: var(--darkcol);
 	border-radius: 10px;
-	border: 2px solid var(--mcol0);
-	box-shadow: 0px 8px 0px var(--mcol0);
+	box-shadow: 0px 0px 0px 5px var(--mcol0), 0px 0px 10px 5px var(--mcol2);
+	transition: opacity 0.25s linear, blur 0.25s linear;
 	overflow: hidden;
-	/* --length: 70vh;
-	--colms: 3; */
 }
 
 .puzzle_block {
@@ -50,41 +148,16 @@ body {
 	color: var(--whitecol);
 	font-weight: bold;
 	text-align: center;
-	border: 1px solid var(--whitecol);
-	border-radius: 5px;
+	border: 2px solid var(--txtcol2);
+	border-radius: 6px;
 	cursor: pointer;
 	user-select: none;
 	/* transition: left 0.3s, top 0.3s; */
-	transition: all 0.35s linear;
+	transition: all 0.2s linear;
 }
-
-/*difficulty container*/
-#difficulty_container {
-	display: flex;
-	flex-direction: row;
-	width: 50vh;
-	height: 10vh;
-	background-color: var(--darkcol);
-	border-radius: 8px;
-	margin-top: 22px;
-}
-.difficulty_button {
-	flex-grow: 1;
-	background-color: inherit;
-	color: var(--mcol2);
-	text-align: center;
-	font-size: 3vh;
-	font-weight: bold;
-	padding-top: 5%;
-	margin: 4px;
-	cursor: pointer;
-	transition: font-size 0.3s;
-}
-.difficulty_button:hover {
-	opacity: 0.8;
-	font-size: 3.5vh;
-}
-.difficulty_button.active {
-	background-color: inherit;
-	color: var(--mcol0);
+#puzzle_container.blur .puzzle_block {
+	opacity: 0.7;
+	filter: blur(35px);
+	user-select: none;
+	pointer-events: none;
 }
