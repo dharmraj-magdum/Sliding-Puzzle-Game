@@ -30,15 +30,18 @@ function selectLevel() {
 }
 
 /////
+//auto resetall when on load
+resetAll();
+
 function startGame() {
 	resetAll();
 	//now display board and secondary menu ,remove level menu
 	menu_container.classList.remove("show");
 	action_container.classList.add("show");
+	initializeGame();
 	setTimeout(() => {
 		puzzle_container.classList.remove("blur");
 	}, 600);
-	initializeGame();
 }
 
 function resetAll() {
@@ -55,7 +58,15 @@ function resetAll() {
 	puzzle_container.innerHTML = "";
 	indexes = [];
 	emptyBlockCoords = [ROW - 1, ROW - 1];
-	BLOCK_WIDTH = Math.floor(puzzle_container.clientHeight / COLM);
+	let screenwidth = window.innerWidth;
+	if (screenwidth < 450) {
+		// if its small scrren use width as max diamention
+		// console.log("small screen");
+		BLOCK_WIDTH = Math.floor((screenwidth - 20) / COLM);
+	} else {
+		// if its big scrren use height as max diamention
+		BLOCK_WIDTH = Math.floor(puzzle_container.clientHeight / COLM);
+	}
 	puzzle_container.style.width = BLOCK_WIDTH * COLM + "px";
 	puzzle_container.style.height = BLOCK_WIDTH * COLM + "px";
 }
@@ -70,7 +81,9 @@ function reStart() {
 	}, 600);
 }
 function openMenu() {
-	resetAll();
+	menu_container.classList.add("show");
+	action_container.classList.remove("show");
+	puzzle_container.classList.add("blur");
 }
 
 function initializeGame() {
@@ -80,7 +93,6 @@ function initializeGame() {
 		for (let x = 0; x < COLM; x++) {
 			let blockIdx = x + y * COLM;
 			// console.log(blockIdx);
-			indexes.push(blockIdx);
 			//put till second-last block if its last break to make empty
 			if (blockIdx > COUNT - 2) {
 				// console.log(x, y, blockIdx);
@@ -88,6 +100,7 @@ function initializeGame() {
 				break;
 			}
 
+			//create a new div for blocks in board
 			let newBlock = document.createElement("div");
 			newBlock.classList.add("puzzle_block");
 			newBlock.innerText = blockIdx + 1;
@@ -96,39 +109,22 @@ function initializeGame() {
 			newBlock.style.lineHeight = BLOCK_WIDTH + "px";
 			newBlock.style.fontSize = (BLOCK_WIDTH * 55) / 100 + "px";
 
+			//add listener to all blocks
+			newBlock.addEventListener("click", (e) => onClickOnBlock(blockIdx));
+
 			puzzle_container.appendChild(newBlock);
 
 			//put the index in array this array is to track which block is where in js
-		}
-	}
-	//grab the all blocks in board
-	all_blocks = document.getElementsByClassName("puzzle_block");
-	//get width of block to do calc
-	// BLOCK_WIDTH  = all_blocks[0].clientWidth;
-	// thire is 1 or 2px diff in width and clent width
-	// console.log(BLOCK_WIDTH, CLIENT_WIDTH);
-	// console.log(indexes);
-	//position each block in its proper position(first in correct order)
-	//beacuse for shuffling they have to at valid places
-	for (let y = 0; y < ROW; y++) {
-		for (let x = 0; x < COLM; x++) {
-			let blockIdx = x + y * COLM;
-
-			if (blockIdx > COUNT - 2) {
-				break;
-			}
+			indexes.push(blockIdx);
+			//grab the all blocks in board
+			//(here this look like repeated query but we need block in list which retrieved in positioning funtion)
+			all_blocks = document.getElementsByClassName("puzzle_block");
 
 			//now position that block to its positin on plane/board
 			positionBlockAtCoord(blockIdx, x, y);
-
-			//add listener to all blocks
-			all_blocks[blockIdx].addEventListener("click", (e) =>
-				onClickOnBlock(blockIdx)
-			);
 		}
 	}
 
-	//suffle board
 	randomize();
 	// console.log(indexes);
 }
@@ -151,6 +147,33 @@ function randomize() {
 		let moved = moveBlock(randomBlockIdx);
 		if (!moved) i--;
 	}
+	//////////not neccesary for better look
+	/// put empty block on specific position after shuffle (ie at bottom-right)
+	//is any block right to empty then move empty to right
+	// console.log(emptyBlockCoords);
+	let canRight = emptyBlockCoords[0] + 1;
+	// console.log(canRight);
+	while (canRight < COLM) {
+		let rightBlockCurrPos = canRight + emptyBlockCoords[1] * COLM;
+		let rightBlockIdx = indexes[rightBlockCurrPos];
+		// console.log(rightBlockIdx);
+		moveBlock(rightBlockIdx);
+		canRight = emptyBlockCoords[0] + 1;
+		// console.log(canRight);
+		// canRight += 10;
+	}
+	//is any block down to empty then move empty to down
+	// console.log(emptyBlockCoords);
+	let canDown = emptyBlockCoords[1] + 1;
+	// console.log(canDown);
+	while (canDown < COLM) {
+		let downBlockCurrPos = emptyBlockCoords[0] + canDown * COLM;
+		let downBlockIdx = indexes[downBlockCurrPos];
+		// console.log(downBlockIdx);
+		moveBlock(downBlockIdx);
+		canDown = emptyBlockCoords[1] + 1;
+		// console.log(canDown);
+	}
 }
 
 function moveBlock(blockIdx) {
@@ -169,6 +192,9 @@ function moveBlock(blockIdx) {
 		let idxOfCurrent = blockCoords[0] + blockCoords[1] * COLM;
 		//put curent in empty'c place in logical array
 		indexes[idxOfEmpty] = indexes[idxOfCurrent];
+		//the old idxOfCurrent value in array stay there (later overwritted)
+		// /but does not cause error as we validate move 1step aside empty
+		//so value in array at empty idx is not considered anywhere
 		//now just store/set emtyblock's new co-ords
 		// (they not used in dom, they are just to check position)
 		emptyBlockCoords[0] = blockCoords[0];
@@ -188,7 +214,7 @@ function isMovable(block) {
 		Math.floor(blockPos[0] / BLOCK_WIDTH),
 		Math.floor(blockPos[1] / BLOCK_WIDTH),
 	];
-	// dif=[Xdiff,Ydiff]=[x1-x2,y1-y1]
+	// dif=[Xdiff,Ydiff]=[x1-x2,y1-y2]
 	let diff = [
 		Math.abs(blockCoords[0] - emptyBlockCoords[0]),
 		Math.abs(blockCoords[1] - emptyBlockCoords[1]),
@@ -201,12 +227,14 @@ function isMovable(block) {
 }
 
 function onClickOnBlock(blockIdx) {
+	// console.log(blockIdx);
 	if (moveBlock(blockIdx)) {
 		//the blx 56yjock is moved alwasys check is it solved now or not
 		if (checkPuzzleSolved()) {
 			setTimeout(() => {
-				win_message.classList.remove("show");
-			}, 700);
+				// console.log("you solved puzzle!");
+				win_message.classList.add("show");
+			}, 400);
 		}
 	}
 }
@@ -222,7 +250,10 @@ function checkPuzzleSolved() {
 			continue;
 		}
 		//if value at array is not corresponde to i(sorted) then is wrong
-		if (indexes[i] != i) return false;
+		if (indexes[i] != i) {
+			// console.log("false", indexes[i], i);
+			return false;
+		}
 	}
 	return true;
 }
